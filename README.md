@@ -1,6 +1,6 @@
 # my-claude-skills
 
-我的个人精选 Claude Code skill 包。一行命令跨机器安装，方便在新设备上快速复刻自己的工作流。
+我的个人精选 Claude Code / Windsurf skill 包。一行命令跨机器安装，方便在新设备上快速复刻自己的工作流。
 
 ## 收录的 skill
 
@@ -31,12 +31,17 @@ curl -fsSL https://raw.githubusercontent.com/hhhhzzzj/my-skills/main/install.sh 
 脚本会：
 
 1. 把仓库 clone 到 `%LOCALAPPDATA%\my-claude-skills`（Windows）或 `~/.local/share/my-claude-skills`（\*nix）
-2. 为 `skills/` 下每个目录在 `~/.claude/skills/` 下建 Junction（Windows）或 symlink（\*nix）
-3. 重启 Claude Code 后生效
+2. 为 `skills/` 下每个目录在 `~/.claude/skills/` 下建 Junction（Windows）或 symlink（\*nix），供 Claude Code 使用
+3. 把 `skills/` 下每个目录复制到 `~/.codeium/windsurf/skills/`，供 Windsurf Cascade 使用
+4. 重启 Claude Code / Windsurf 后生效
+
+> Windsurf 理论上能通过 `Read Claude Code Config` 读取 `~/.claude/skills/`，但 Windows 下 Junction 支持不稳定。本仓库对 Windsurf 使用真实目录复制，更稳。
 
 ### 重新跑一次会怎样（幂等）
 
-`install` 既是首次安装命令，也是更新命令。重跑时按 skill 状态分别处理：
+`install` 既是首次安装命令，也是更新命令。重跑时按 skill 状态分别处理。
+
+Claude Code：
 
 | `~/.claude/skills/<name>/` 当前状态      | 行为                                              | 输出标记   |
 | ---------------------------------------- | ------------------------------------------------- | ---------- |
@@ -45,7 +50,16 @@ curl -fsSL https://raw.githubusercontent.com/hhhhzzzj/my-skills/main/install.sh 
 | 是别的目录或指向别处的链接               | **不动**，警告（保护你手动放的其他来源 skill）    | `! <name>` |
 | 我们之前装的，但仓库里已经删掉这个 skill | 自动 unlink（清理 stale）                         | `- <name>` |
 
-要把"被跳过"的某个 skill 替换成 my-claude-skills 的版本，先手动删除 `~/.claude/skills/<name>` 再重跑 install 就行。
+Windsurf：
+
+| `~/.codeium/windsurf/skills/<name>/` 当前状态 | 行为                                           | 输出标记   |
+| --------------------------------------------- | ---------------------------------------------- | ---------- |
+| 不存在                                        | 复制真实目录，并写入 `.my-claude-skills-managed` 标记 | `+ <name>` |
+| 是 my-claude-skills 管理的复制目录            | 删除旧副本并复制最新版                         | `= <name>` |
+| 是别的目录或链接                              | **不动**，警告（保护你手动放的其他来源 skill） | `! <name>` |
+| 我们之前装的，但仓库里已经删掉这个 skill      | 自动删除该托管副本                             | `- <name>` |
+
+要把"被跳过"的某个 skill 替换成 my-claude-skills 的版本，先手动删除对应目录再重跑 install 就行。
 
 ## 更新
 
@@ -77,7 +91,7 @@ curl -fsSL https://raw.githubusercontent.com/hhhhzzzj/my-skills/main/install.sh 
 
 1. 把 skill 目录放到 `skills/<name>/`，至少含 `SKILL.md`
 2. `git push`
-3. 重新跑 install 命令——新 skill 会自动被链上
+3. 重新跑 install 命令——新 skill 会自动同步到 Claude Code 和 Windsurf
 
 也欢迎 fork 这个仓库做成你自己的精选包。
 
